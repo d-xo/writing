@@ -60,7 +60,7 @@ $D_{n_i}^{n_j}$ is the distance from $n_i$ to $n_j$.
 
 The distance can be calculated as the length of the shortest path between $n_i$ and $n_j$.
 
-$S_{n_i}^{n_j}$ is the scale factor for $n_j$ from the point of view of $n_i$, and is a function over $D_{n_i}^{n_j}$.
+$S_{n_i}^{n_j}$ is the scale factor for $n_j$ from the point of view of $n_i$, and is a total function over $D_{n_i}^{n_j}$.
 
 Further thought would be required to select the exact function, but for our purposes it should tend to zero as the distance increases.
 
