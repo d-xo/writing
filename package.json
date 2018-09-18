@@ -16,7 +16,5 @@
   "scripts": {
     "precommit": "yarn upload",
     "upload": "node publish.js src/"
-
-    
   }
 }
