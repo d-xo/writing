@@ -42,19 +42,19 @@ Some kind of incentivized off chain execution may be feasible for small graphs. 
 
 ## Formal Definition
 
-**Definitions**
+### Definitions
 
 $N$ is the set of all nodes $\{n_1, ..., n_i\}$.
 
 $C_{n_i}$ is the set of all trust connections on $n_i$ $\{c_1, ..., c_j\}$.
 
-**Trust**
+### Trust
 
 $B_{n_i}^{c_j}$ is the balance for $c_j$ on $n_i$.
 
 The trust at $n_i$ is $T_{n_i} = \sum_1^j B_{n_i}^{c_j}$.
 
-**Scaling By Distance**
+### Scaling By Distance
 
 $D_{n_i}^{n_j}$ is the distance from $n_i$ to $n_j$.
 
@@ -64,11 +64,11 @@ $S_{n_i}^{n_j}$ is the scale factor for $n_j$ from the point of view of $n_i$, a
 
 Further thought would be required to select the exact function, but for our purposes it should tend to zero as the distance increases.
 
-**Weighting**
+### Weighting
 
 The weight for $n_j$ from the point of view of $n_i$ is $W_{n_i}^{n_j} = T_{n_j} \times S_{n_i}^{n_j}$
 
-**Issuance Rate**
+### Issuance Rate
 
 $V_{n_i}$ is the proposed issuance rate at $n_i$ (vote)
 
