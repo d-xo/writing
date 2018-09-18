@@ -1,0 +1,16 @@
+{
+  "name": "writing",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "github-markdown-css": "^2.10.0",
+    "ipfs-mini": "^1.1.2",
+    "markdown-it": "^8.4.2",
+    "markdown-it-katex": "^2.0.3",
+    "markdown-it-mathjax": "^2.0.0",
+    "mz": "^2.7.0",
+    "node-html-encoder": "^0.0.2",
+    "unescape": "^1.0.1"
+  }
+}
