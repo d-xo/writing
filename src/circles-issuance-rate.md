@@ -72,4 +72,4 @@ The weight for $n_j$ from the point of view of $n_i$ is $W_{n_i}^{n_j} = T_{n_j}
 
 $V_{n_i}$ is the proposed issuance rate at $n_i$ (vote)
 
-The issuance rate at $n_i$ is $R_{n_i} = \frac{\sum_1^j W_{n_i}^{n_j} \times V_{n_i}}{\sum_1^j W_{n_i}^{n_j}}$
+The issuance rate at $n_i$ is $R_{n_i} = \frac{\sum_1^j W_{n_i}^{n_j} \times V_{n_j}}{\sum_1^j W_{n_i}^{n_j}}$
