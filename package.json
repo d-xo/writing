@@ -13,6 +13,6 @@
     "node-fetch": "^2.2.0"
   },
   "scripts": {
-    "upload": "echo $(node publish.js src/ | tail -1) > readme.md; cat readme.md"
+    "upload": "echo $(node upload.js src/ | tail -1) > readme.md; cat readme.md"
   }
 }
