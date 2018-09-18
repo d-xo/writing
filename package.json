@@ -15,7 +15,7 @@
     "node-fetch": "^2.2.0"
   },
   "lint-staged": {
-    "*.{md}": [
+    "*": [
       "echo $(yarn upload | tail -2 | sed -n 1p) > readme.md",
       "git add"
     ]
