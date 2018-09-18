@@ -1,24 +1,18 @@
-const IPFS = require('ipfs-mini');
 const fs = require('mz/fs');
 const md = require('markdown-it')();
 const mk = require('markdown-it-katex');
-const decode = require('unescape');
+const { resolve } = require('path');
+const IPFS = require('ipfs');
+const fetch = require('node-fetch');
 
 md.use(mk);
 
-const infura = new IPFS({
-  host: 'ipfs.infura.io',
-  port: 5001,
-  protocol: 'https'
-});
+// --------------------------------------------------------------------------------------------
+// HTML
+// --------------------------------------------------------------------------------------------
 
-const local = new IPFS({
-  host: '127.0.0.1',
-  port: 5001,
-  protocol: 'http'
-});
-
-const katex = 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css'
+const katex =
+  'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css';
 const githubMarkdown =
   'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.10.0/github-markdown.min.css';
 
@@ -59,27 +53,111 @@ const suffix = `
 </html>
 `;
 
-const build = async path => {
-  const raw = await fs.readFile(path);
+// --------------------------------------------------------------------------------------------
+// UTIL
+// --------------------------------------------------------------------------------------------
+
+const mkdir = async (path, root) => {
+  var dirs = path.split('/'),
+    dir = dirs.shift(),
+    root = (root || '') + dir + '/';
+
+  try {
+    await fs.mkdir(root);
+  } catch (e) {
+    //dir wasn't made, something went wrong
+    if (!(await fs.stat(root)).isDirectory()) throw new Error(e);
+  }
+
+  return !dirs.length || mkdir(dirs.join('/'), root);
+};
+
+const flatten = array => {
+  return [].concat(...array);
+};
+
+const mdToHtml = path => {
+  return path.replace(new RegExp('.md$'), '.html');
+};
+
+const stripRoot = (root, path) => {
+  return path.replace(new RegExp('^' + resolve(root) + '/'), '');
+};
+
+// --------------------------------------------------------------------------------------------
+// READ FILES
+// --------------------------------------------------------------------------------------------
+
+const getFiles = async root => {
+  const subdirs = await fs.readdir(root);
+  const files = await Promise.all(
+    subdirs.map(async subdir => {
+      const res = resolve(root, subdir);
+      return (await fs.stat(res)).isDirectory() ? getFiles(res) : res;
+    })
+  );
+
+  return flatten(files);
+};
+
+const getMarkdownFiles = async root => {
+  const files = await getFiles(root);
+  return files.filter(path => path.endsWith('.md'));
+};
+
+// --------------------------------------------------------------------------------------------
+// RENDER MARKDOWN
+// --------------------------------------------------------------------------------------------
+
+const renderFile = async input => {
+  const raw = await fs.readFile(input);
   const rendered = md.render(raw.toString());
   return `${prefix}\n${rendered}\n${suffix}`;
 };
 
-const publish = async (data, node) => {
-  const cid = await new Promise((resolve, reject) => {
-    node.add(data, (err, result) => {
-      if (err) reject(new Error(err));
-      resolve(result);
-    });
+const renderDir = async root => {
+  const input = await getMarkdownFiles(root);
+
+  const promises = input.map(async path => {
+    const slug = `/writing/${mdToHtml(stripRoot(root, path))}`;
+    const data = await renderFile(path);
+    return { path: slug, content: Buffer.from(data) };
   });
-  return cid;
+
+  return await Promise.all(promises);
 };
 
+// --------------------------------------------------------------------------------------------
+// IPFS
+// --------------------------------------------------------------------------------------------
+
+const addFolder = async (node, folder) => {
+  const files = await renderDir(folder);
+  return await node.files.add(files);
+};
+
+const pin = async hash => {
+  const infura = 'https://ipfs.infura.io:5001';
+  const url = `api/v0/pin/add?arg=${hash}&recursive=true`;
+  const res = await fetch(`${infura}/${url}`);
+  return await res.text();
+};
+
+// --------------------------------------------------------------------------------------------
+// MAIN
+// --------------------------------------------------------------------------------------------
+
 const main = async () => {
-  const data = await build(process.argv['2']);
-  const cid = await publish(data, local);
-  await publish(data, infura);
-  console.log(`url: https://ipfs.io/ipfs/${cid}`);
+  const folder = process.argv['2'];
+  const node = new IPFS();
+
+  node.on('ready', async () => {
+    const addedFiles = await addFolder(node, folder);
+    const hash = addedFiles[0].hash;
+    await pin(hash);
+    console.log(`https://ipfs.io/ipfs/${hash}`);
+    process.exit();
+  });
 };
 
 main();
